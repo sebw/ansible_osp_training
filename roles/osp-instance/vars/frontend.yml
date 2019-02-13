@@ -1,0 +1,4 @@
+---
+instance_name: frontend
+meta: group=frontend,deployment_name=dev
+security_group_name: frontend

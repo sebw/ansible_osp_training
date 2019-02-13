@@ -1,0 +1,25 @@
+---
+- name: deploy instances
+  hosts: localhost
+  connection: local
+
+  tasks:
+  - name: Create app1 instance
+    include_role:
+      name: osp-instance
+      vars_from: app1.yml
+
+  - name: Create app2 instance
+    include_role:
+      name: osp-instance
+      vars_from: app2.yml
+
+  - name: Create frontend instance
+    include_role:
+      name: osp-instance
+      vars_from: frontend.yml
+
+  - name: Create DB instance
+    include_role:
+      name: osp-instance
+      vars_from: db.yml

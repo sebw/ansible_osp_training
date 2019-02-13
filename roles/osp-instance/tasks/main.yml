@@ -1,0 +1,57 @@
+- name: Deploy an instance
+  os_server:
+    cloud: ospcloud
+    state: present
+    name: "{{ instance_name }}"
+    image: rhel-guest
+    wait: yes
+    flavor: m2.small
+    key_name: ansible_ssh
+    security_groups: "{{ security_group_name }}"
+    meta: "{{ meta }}"
+    nics:
+      - net-name: int_network
+    userdata: |
+      #!/bin/bash
+      curl -o /tmp/openstack.pub http://www.opentlc.com/download/ansible_bootcamp/openstack_keys/openstack.pub
+      cat /tmp/openstack.pub >> /home/cloud-user/.ssh/authorized_keys
+      curl -o /tmp/internal.repo http://www.opentlc.com/download/ansible_bootcamp/repo/internal.repo
+      cp /tmp/internal.repo /etc/yum.repos.d/internal.repo
+  register: deploy
+
+- name: print debug
+  debug:
+    var: deploy
+
+- name: assign floating IP
+  os_floating_ip:
+    cloud: ospcloud
+    server: "{{ instance_name }}"
+    network: ext_network
+    state: present # not required. choices: present;absent. Should the resource be present or absent.
+    wait: yes
+    reuse: yes
+    timeout: 180
+  register: floating
+
+- name: display output
+  debug:
+    var: floating
+
+- name: wait for node to be up and running
+  wait_for:
+    host: "{{ floating.floating_ip.floating_ip_address }}"
+    port: 22
+    delay: 10
+    timeout: 600
+  delegate_to: localhost
+
+- name: add node to dynamic inventory
+  add_host:
+    name: "{{ instance_name }}"
+    groups: webservers
+    ansible_ssh_host: "{{ floating.floating_ip.floating_ip_address }}"
+
+- name: do something on new node
+  command: w
+  delegate_to: "{{ instance_name }}"

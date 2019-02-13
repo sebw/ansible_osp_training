@@ -1,0 +1,26 @@
+---
+- name: In momory inventory play
+  hosts: localhost
+  tasks:  
+  - name: Fetch Instance Info
+    os_server_facts:
+      cloud: ospcloud
+      region_name: RegionOne
+    register: result
+
+  - name: debug
+    debug:
+      var: result
+
+  - name: Add host
+    add_host:
+      name: "{{ item.public_v4 }}"
+      group: "webservers"
+      ansible_ssh_private_key_file: /home/cloud-user/.ssh/openstack.pem
+      ansible_ssh_user: cloud-user
+    with_items: "{{ result.ansible_facts.openstack_servers }}"
+            
+- hosts: all 
+  gather_facts: false
+  tasks:     
+  - ping:

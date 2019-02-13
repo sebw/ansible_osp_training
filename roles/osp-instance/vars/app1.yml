@@ -1,0 +1,4 @@
+---
+instance_name: app1
+meta: group=apps,deployment_name=dev
+security_group_name: apps

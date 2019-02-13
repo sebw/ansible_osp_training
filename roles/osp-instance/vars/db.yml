@@ -1,0 +1,4 @@
+---
+instance_name: db
+meta: group=db,deployment_name=dev
+security_group_name: db
